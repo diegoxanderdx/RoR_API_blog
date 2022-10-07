@@ -1,20 +1,23 @@
 class PostsController < ApplicationController
 
-rescue_from Exception do |e|
-  render json: {error: e.message}, status: :internal_error
-end
-
-rescue_from ActiveRecord::RecordInvalid do |e|
-  render json: {error: e.message}, status: :unprocessable_entity
-end
-
-  # GET /post
-  def index
-    @posts = Post.where(published: true)
-    render json: @posts, status: :ok
+  rescue_from Exception do |e|
+    render json: {error: e.message}, status: :internal_error
   end
 
-  # GET /post/{id}
+  rescue_from ActiveRecord::RecordInvalid do |e|
+    render json: {error: e.message}, status: :unprocessable_entity
+  end
+
+  # GET /posts
+  def index
+    @posts = Post.where(published: true)
+    if !params[:search].nil? && params[:search].present?
+      @posts = PostsSearchService.search(@posts, params[:search])
+    end
+    render json: @posts.includes(:user), status: :ok
+  end
+
+  # GET /posts/{id}
   def show
     @post = Post.find(params[:id])
     render json: @post, status: :ok
