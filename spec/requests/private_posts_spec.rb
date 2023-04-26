@@ -8,11 +8,12 @@ RSpec.describe "Posts with authentication", type: :request do
   let!(:other_user_post_draft) { create(:post, user_id: other_user.id, published: false) }
   let!(:auth_headers) { { 'Authorization' => "Bearer #{user.auth_token}" } }
   let!(:other_auth_headers) { { 'Authorization' => "Bearer #{other_user.auth_token}" } }
-  let!(:create_params) { {"post" =>{"title" => "title", "content" => "content", "published" => true}}}
-  let!(:update_params) { {"post" =>{"title" => "title", "content" => "content", "published" => true}}}
+  let!(:create_params) { { "post" => {"title" => "title", "content" => "content", "published" => true}} }
+  let!(:update_params) { { "post" => {"title" => "title", "content" => "content", "published" => true}} }
   
   describe "GET /posts/{id}" do
     context "with valid auth" do
+      before { allow(JsonWebToken).to receive(:verify).and_return([{email: user.email}]) }
       context "when requisting other's author post" do
         context "when post is public" do
           before { get "/posts/#{other_user_post.id}", headers: auth_headers }
@@ -45,9 +46,10 @@ RSpec.describe "Posts with authentication", type: :request do
   end
 
   describe "POST /posts" do
-    #con auth  -> crear
+    # con auth -> crear
     context "with valid auth" do
-      before { post "/posts", params: create_params ,headers: auth_headers }
+      before { allow(JsonWebToken).to receive(:verify).and_return([{email: user.email}]) }
+      before { post "/posts", params: create_params, headers: auth_headers }
 
       context "payload" do
         subject { payload }
@@ -58,7 +60,7 @@ RSpec.describe "Posts with authentication", type: :request do
         it { is_expected.to have_http_status(:created) }
       end
     end
-    #sin auth -> !crear
+    # sin auth -> !crear -> 401
     context "without auth" do
       before { post "/posts", params: create_params }
 
@@ -74,13 +76,13 @@ RSpec.describe "Posts with authentication", type: :request do
   end
 
   describe "PUT /posts" do
-    #con auth->
-      #actualizar post nuestro
-      #!actualizar post de otro ->error 401
+    # con auth -> 
+      # actualizar un post nuestro
+      # !actualizar un post de otro -> 401
     context "with valid auth" do
-      context "when updating user's post" do
-        before { put "/posts/#{user_post.id}", params: update_params ,headers: auth_headers }
-
+      before { allow(JsonWebToken).to receive(:verify).and_return([{email: user.email}]) }
+      context "when updating users's post" do
+        before { put "/posts/#{user_post.id}", params: update_params, headers: auth_headers }
         context "payload" do
           subject { payload }
           it { is_expected.to include(:id, :title, :content, :published, :author) }
@@ -92,9 +94,8 @@ RSpec.describe "Posts with authentication", type: :request do
         end
       end
 
-      context "when updating other user post" do
-        before { put "/posts/#{other_user_post.id}", params: update_params ,headers: auth_headers }
-
+      context "when updating other users's post" do
+        before { put "/posts/#{other_user_post.id}", params: update_params, headers: auth_headers }
         context "payload" do
           subject { payload }
           it { is_expected.to include(:error) }
@@ -105,9 +106,7 @@ RSpec.describe "Posts with authentication", type: :request do
         end
       end
     end
-    #sin auth -> !actualizar -> error 401
   end
-    
   private
 
   def payload
