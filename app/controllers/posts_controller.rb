@@ -46,7 +46,6 @@ class PostsController < ApplicationController
     @post.update!(update_params)
     render json: @post, status: :ok
   end
-
   private
 
   def create_params
