@@ -107,7 +107,6 @@ RSpec.describe "Posts with authentication", type: :request do
       end
     end
   end
-
   private
 
   def payload
