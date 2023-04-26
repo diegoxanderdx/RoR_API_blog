@@ -1,24 +1,9 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This repository have code of a API for a blog. I used ruby 3.1 and rails 7.
 
-Things you may want to cover:
+Have authentication, mailer, CRUD for posts, reports, cache to acelerate searches.
 
-* Ruby version
+Testing with Rspec
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Postgresql database
